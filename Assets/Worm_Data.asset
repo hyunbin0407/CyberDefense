@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03e2030e5a1144102b70c3ba5c15a31d, type: 3}
+  m_Name: Worm_Data
+  m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.EnemyData
+  enemyType: 0
+  displayName: "\uC6DC"
+  icon: {fileID: 0}
+  enemyPrefab: {fileID: 9101383704033335072, guid: 4d2114453df9a464693985f7ba931c45, type: 3}
+  maxHealth: 30
+  moveSpeed: 2
+  damageToServer: 1
+  rewardOnKill: 5
+  isStealth: 0
+  damageResistance: 0
