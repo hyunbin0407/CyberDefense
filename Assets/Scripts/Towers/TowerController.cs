@@ -12,7 +12,7 @@ namespace CyberDefense.Towers
     {
         [SerializeField] private TowerData data;
         [SerializeField] private Transform firePoint;
-        [SerializeField] private LineRenderer attackLine; // 간단한 레이저형 공격 연출용 (선택)
+        [SerializeField] private LineRenderer attackLine;
 
         public int CurrentLevel { get; private set; } = 1;
         public Vector2Int GridCell { get; private set; }
@@ -21,7 +21,23 @@ namespace CyberDefense.Towers
         private float attackTimer;
         private EnemyController currentTarget;
 
-        private static readonly Collider2D[] overlapBuffer = new Collider2D[32];
+        private readonly List<EnemyController> enemiesInRange = new List<EnemyController>();
+        private CircleCollider2D rangeCollider;
+        private readonly Collider2D[] overlapBuffer = new Collider2D[32];
+
+        private void Awake()
+        {
+            rangeCollider = GetComponent<CircleCollider2D>();
+            if (rangeCollider == null)
+                rangeCollider = gameObject.AddComponent<CircleCollider2D>();
+            rangeCollider.isTrigger = true;
+
+            if (data != null)
+            {
+                currentDamage = data.damage;
+                rangeCollider.radius = data.attackRange;
+            }
+        }
 
         public void Initialize(TowerData towerData, Vector2Int cell)
         {
@@ -29,6 +45,7 @@ namespace CyberDefense.Towers
             GridCell = cell;
             currentDamage = data.damage;
             CurrentLevel = 1;
+            rangeCollider.radius = data.attackRange;
 
             if (attackLine != null) attackLine.enabled = false;
         }
@@ -39,10 +56,9 @@ namespace CyberDefense.Towers
 
             attackTimer -= Time.deltaTime;
 
-            if (currentTarget == null || !IsTargetValid(currentTarget))
-            {
-                currentTarget = FindTarget();
-            }
+            // 죽거나 null이 된 타겟 갱신
+            if (currentTarget == null || currentTarget.IsDead)
+                currentTarget = FindBestTarget();
 
             if (currentTarget != null && attackTimer <= 0f)
             {
@@ -58,33 +74,38 @@ namespace CyberDefense.Towers
             }
         }
 
-        private bool IsTargetValid(EnemyController target)
+        // 적이 사거리 안에 들어오면 리스트에 추가
+        private void OnTriggerEnter2D(Collider2D other)
         {
-            if (target == null || target.IsDead) return false;
-            float dist = Vector2.Distance(transform.position, target.transform.position);
-            return dist <= data.attackRange;
+            var enemy = other.GetComponent<EnemyController>();
+            if (enemy != null && !enemiesInRange.Contains(enemy))
+                enemiesInRange.Add(enemy);
+        }
+
+        // 적이 사거리 밖으로 나가면 리스트에서 제거
+        private void OnTriggerExit2D(Collider2D other)
+        {
+            var enemy = other.GetComponent<EnemyController>();
+            if (enemy != null)
+                enemiesInRange.Remove(enemy);
         }
 
         /// <summary>
-        /// 사거리 내에서 가장 진행도가 높은(서버에 가까운) 적을 우선 타겟으로 삼습니다.
-        /// canDetectStealth가 false인 타워는 은신 적(제로데이)을 무시합니다.
+        /// 사거리 내 적 중 경로를 가장 많이 진행한(서버에 가까운) 적을 우선 타겟으로 반환합니다.
         /// </summary>
-        private EnemyController FindTarget()
+        private EnemyController FindBestTarget()
         {
-            int count = Physics2D.OverlapCircleNonAlloc(
-                transform.position, data.attackRange, overlapBuffer);
+            // 이미 사망하거나 파괴된 적 정리
+            enemiesInRange.RemoveAll(e => e == null || e.IsDead);
 
             EnemyController best = null;
             float bestScore = float.NegativeInfinity;
 
-            for (int i = 0; i < count; i++)
+            foreach (var enemy in enemiesInRange)
             {
-                var enemy = overlapBuffer[i].GetComponent<EnemyController>();
-                if (enemy == null || enemy.IsDead) continue;
                 if (enemy.IsStealth && !data.canDetectStealth) continue;
 
-                // 서버에 가까울수록(경로를 많이 지났을수록) 우선순위 높음 - 근사치로 x축 등 활용 가능
-                float score = -Vector2.Distance(enemy.transform.position, transform.position);
+                float score = enemy.WaypointIndex;
                 if (score > bestScore)
                 {
                     bestScore = score;
@@ -98,13 +119,9 @@ namespace CyberDefense.Towers
         private void Attack(EnemyController target)
         {
             if (data.isAreaAttack)
-            {
                 AttackArea(target.transform.position);
-            }
             else
-            {
                 target.TakeDamage(currentDamage);
-            }
         }
 
         private void AttackArea(Vector3 center)
@@ -119,13 +136,9 @@ namespace CyberDefense.Towers
             }
         }
 
-        /// <summary>
-        /// 재화가 충분할 때 UI 등에서 호출하여 타워를 업그레이드합니다.
-        /// </summary>
         public bool TryUpgrade()
         {
             if (CurrentLevel >= data.maxLevel) return false;
-
             CurrentLevel++;
             currentDamage *= data.upgradeDamageMultiplier;
             return true;

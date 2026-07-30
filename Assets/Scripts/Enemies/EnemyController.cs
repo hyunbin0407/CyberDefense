@@ -12,12 +12,14 @@ namespace CyberDefense.Enemies
     /// WaveSpawner가 스폰 시 Initialize()를 호출해서 경로와 데이터를 주입합니다.
     /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
+    [RequireComponent(typeof(Rigidbody2D))]
     public class EnemyController : MonoBehaviour
     {
         public EnemyData Data { get; private set; }
         public float CurrentHealth { get; private set; }
         public bool IsStealth => Data != null && Data.isStealth;
         public bool IsDead { get; private set; }
+        public int WaypointIndex => currentWaypointIndex;
 
         public event Action<EnemyController> OnDeath;
         public event Action<EnemyController> OnReachedServer;
@@ -25,10 +27,12 @@ namespace CyberDefense.Enemies
         private List<Vector3> waypoints;
         private int currentWaypointIndex;
         private SpriteRenderer spriteRenderer;
+        private Rigidbody2D rb;
 
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
+            rb = GetComponent<Rigidbody2D>();
         }
 
         public void Initialize(EnemyData data, List<Vector3> path)
@@ -43,10 +47,10 @@ namespace CyberDefense.Enemies
                 spriteRenderer.sprite = data.icon;
 
             if (waypoints != null && waypoints.Count > 0)
-                transform.position = waypoints[0];
+                rb.position = waypoints[0];
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             if (IsDead || waypoints == null || waypoints.Count == 0) return;
             MoveAlongPath();
@@ -61,10 +65,11 @@ namespace CyberDefense.Enemies
             }
 
             Vector3 target = waypoints[currentWaypointIndex];
-            transform.position = Vector3.MoveTowards(
-                transform.position, target, Data.moveSpeed * Time.deltaTime);
+            Vector2 newPos = Vector2.MoveTowards(
+                rb.position, target, Data.moveSpeed * Time.fixedDeltaTime);
+            rb.MovePosition(newPos);
 
-            if (Vector3.Distance(transform.position, target) < 0.05f)
+            if (Vector2.Distance(newPos, (Vector2)target) < 0.05f)
             {
                 currentWaypointIndex++;
             }
