@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: "\uBC29\uD654\uBCBD"
   description: 
   icon: {fileID: 0}
-  towerPrefab: {fileID: 0}
+  towerPrefab: {fileID: 1723811762029025745, guid: 63e5607d99a2e40c798d8601f46a1fb0, type: 3}
   damage: 10
   attackRange: 3
   attackCooldown: 1
