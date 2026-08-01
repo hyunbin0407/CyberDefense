@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using CyberDefense.Core;
 using CyberDefense.Data;
 using CyberDefense.Economy;
@@ -27,6 +28,11 @@ namespace CyberDefense.UI
         private void Update()
         {
             if (selectedTowerData == null) return;
+
+            // 짓기 버튼 등 UI 위에서 발생한 클릭은 그리드 배치로 처리하지 않음
+            // (그렇지 않으면 버튼을 누른 그 클릭이 그대로 화면 좌표의 셀에 배치를 시도해
+            //  크레딧만 소모되고 타워는 UI 뒤에 숨어 보이지 않는 문제가 생김)
+            if (IsPointerOverUI()) return;
 
             Vector3 worldPos = GetPointerWorldPosition();
             if (worldPos == Vector3.negativeInfinity) return;
@@ -130,6 +136,16 @@ namespace CyberDefense.UI
                 return Input.GetTouch(0).phase == TouchPhase.Ended;
             }
             return Input.GetMouseButtonUp(0);
+        }
+
+        private bool IsPointerOverUI()
+        {
+            if (EventSystem.current == null) return false;
+
+            if (Input.touchCount > 0)
+                return EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId);
+
+            return EventSystem.current.IsPointerOverGameObject();
         }
     }
 }
