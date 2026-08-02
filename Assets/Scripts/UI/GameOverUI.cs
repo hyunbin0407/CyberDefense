@@ -1,0 +1,67 @@
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using CyberDefense.Core;
+
+namespace CyberDefense.UI
+{
+    /// <summary>
+    /// 게임이 승리(Victory) 또는 패배(Defeat) 상태가 되면 결과 팝업을 띄우는 스크립트입니다.
+    /// GameOverPanel(초기에는 비활성화된 UI 패널)을 만들고 이 스크립트를 붙이세요.
+    /// </summary>
+    public class GameOverUI : MonoBehaviour
+    {
+        [Header("연결할 UI 요소")]
+        [SerializeField] private GameObject panelRoot; // 평소엔 꺼져있다가 게임 끝나면 켜짐
+        [SerializeField] private TMP_Text resultText;
+        [SerializeField] private Button restartButton;
+
+        private void Start()
+        {
+            if (panelRoot != null)
+                panelRoot.SetActive(false);
+
+            if (GameManager.Instance != null)
+                GameManager.Instance.OnGameStateChanged += HandleGameStateChanged;
+
+            if (restartButton != null)
+                restartButton.onClick.AddListener(HandleRestartClicked);
+        }
+
+        private void OnDestroy()
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.OnGameStateChanged -= HandleGameStateChanged;
+
+            if (restartButton != null)
+                restartButton.onClick.RemoveListener(HandleRestartClicked);
+        }
+
+        private void HandleGameStateChanged(GameManager.GameState newState)
+        {
+            if (newState == GameManager.GameState.Victory)
+            {
+                ShowResult(true);
+            }
+            else if (newState == GameManager.GameState.Defeat)
+            {
+                ShowResult(false);
+            }
+        }
+
+        private void ShowResult(bool isVictory)
+        {
+            if (panelRoot != null)
+                panelRoot.SetActive(true);
+
+            if (resultText != null)
+                resultText.text = isVictory ? "방어 성공!\n서버를 지켜냈습니다." : "방어 실패\n서버가 침해당했습니다.";
+        }
+
+        private void HandleRestartClicked()
+        {
+            if (GameManager.Instance != null)
+                GameManager.Instance.RestartLevel();
+        }
+    }
+}
