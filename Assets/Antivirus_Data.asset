@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b3eed76746548308665c4519535d75, type: 3}
+  m_Name: Antivirus_Data
+  m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.TowerData
+  towerType: 2
+  displayName: "\uC548\uD2F0\uBC14\uC774\uB7EC\uC2A4"
+  description:
+  icon: {fileID: 0}
+  towerPrefab: {fileID: 6177763909599089331, guid: 465bf2fdfcfd04704bd676561d3fd1ca, type: 3}
+  damage: 5
+  attackRange: 2.5
+  attackCooldown: 1.5
+  isAreaAttack: 1
+  areaRadius: 1.5
+  canDetectStealth: 0
+  buildCost: 70
+  upgradeCost: 30
+  maxLevel: 3
+  upgradeDamageMultiplier: 1.3
