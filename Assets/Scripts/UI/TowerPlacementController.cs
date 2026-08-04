@@ -52,6 +52,11 @@ namespace CyberDefense.UI
         {
             selectedTowerData = data;
 
+            // 클릭한 버튼이 EventSystem에 "선택됨" 상태로 계속 남아
+            // 배치가 끝난 뒤에도 버튼 색이 원래대로 안 돌아오는 문제 방지
+            if (EventSystem.current != null)
+                EventSystem.current.SetSelectedGameObject(null);
+
             if (previewInstance != null) Destroy(previewInstance);
             if (placementPreviewPrefab != null)
             {
