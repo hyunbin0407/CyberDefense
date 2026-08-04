@@ -16,6 +16,10 @@ namespace CyberDefense.UI
         [SerializeField] private TMP_Text resultText;
         [SerializeField] private Button restartButton;
 
+        [Header("게임 종료 시 비활성화할 타워 짓기 버튼들")]
+        [SerializeField] private Button[] buildButtons;
+        [SerializeField] private TowerPlacementController placementController;
+
         private void Start()
         {
             if (panelRoot != null)
@@ -56,6 +60,18 @@ namespace CyberDefense.UI
 
             if (resultText != null)
                 resultText.text = isVictory ? "방어 성공!\n서버를 지켜냈습니다." : "방어 실패\n서버가 침해당했습니다.";
+
+            // 게임이 끝나면 다시하기 버튼만 누를 수 있도록 타워 짓기 버튼은 모두 비활성화(회색 처리)
+            if (placementController != null)
+                placementController.CancelPlacement();
+
+            if (buildButtons != null)
+            {
+                foreach (var button in buildButtons)
+                {
+                    if (button != null) button.interactable = false;
+                }
+            }
         }
 
         private void HandleRestartClicked()
