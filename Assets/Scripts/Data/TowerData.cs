@@ -41,5 +41,13 @@ namespace CyberDefense.Data
         [Range(1, 5)] public int maxLevel = 3;
         [Tooltip("레벨업마다 곱해지는 데미지 배율")]
         public float upgradeDamageMultiplier = 1.3f;
+
+        [Header("디버프 (허니팟 등)")]
+        [Tooltip("true면 공격 시 데미지와 별개로 적 이동속도를 늦추는 슬로우 효과를 적용합니다.")]
+        public bool appliesSlow = false;
+        [Tooltip("슬로우 적용 시 남는 이동속도 비율 (0.4 = 원래 속도의 40%로 감소, 즉 60% 슬로우)")]
+        [Range(0.1f, 1f)] public float slowMultiplier = 0.5f;
+        [Tooltip("슬로우 효과 지속시간(초)")]
+        public float slowDuration = 2f;
     }
 }
