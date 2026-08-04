@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03e2030e5a1144102b70c3ba5c15a31d, type: 3}
+  m_Name: ZeroDay_Data
+  m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.EnemyData
+  enemyType: 2
+  displayName: "제로데이"
+  icon: {fileID: 0}
+  enemyPrefab: {fileID: 6074164698812134423, guid: d21e67a0b77dc03418191837a2e5dbda, type: 3}
+  maxHealth: 40
+  moveSpeed: 1.6
+  damageToServer: 2
+  rewardOnKill: 10
+  isStealth: 1
+  damageResistance: 0
