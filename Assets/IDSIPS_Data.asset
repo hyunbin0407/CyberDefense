@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b3eed76746548308665c4519535d75, type: 3}
+  m_Name: IDSIPS_Data
+  m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.TowerData
+  towerType: 1
+  displayName: "IDS/IPS"
+  description:
+  icon: {fileID: 0}
+  towerPrefab: {fileID: 2349437036879387305, guid: 5f2e25aca167c3767ea33aea4087b500, type: 3}
+  damage: 8
+  attackRange: 3.5
+  attackCooldown: 0.9
+  isAreaAttack: 0
+  areaRadius: 1.5
+  canDetectStealth: 1
+  buildCost: 80
+  upgradeCost: 35
+  maxLevel: 3
+  upgradeDamageMultiplier: 1.3
+  appliesSlow: 0
+  slowMultiplier: 0.5
+  slowDuration: 2
