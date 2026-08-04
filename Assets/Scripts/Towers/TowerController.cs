@@ -121,7 +121,7 @@ namespace CyberDefense.Towers
             if (data.isAreaAttack)
                 AttackArea(target.transform.position);
             else
-                target.TakeDamage(currentDamage);
+                ApplyHit(target);
         }
 
         private void AttackArea(Vector3 center)
@@ -132,8 +132,20 @@ namespace CyberDefense.Towers
                 var enemy = overlapBuffer[i].GetComponent<EnemyController>();
                 if (enemy == null || enemy.IsDead) continue;
                 if (enemy.IsStealth && !data.canDetectStealth) continue;
-                enemy.TakeDamage(currentDamage);
+                ApplyHit(enemy);
             }
+        }
+
+        /// <summary>
+        /// 데미지와 슬로우(허니팟 등 디버프형 타워) 효과를 대상에게 함께 적용합니다.
+        /// </summary>
+        private void ApplyHit(EnemyController target)
+        {
+            if (data.appliesSlow)
+                target.ApplySlow(data.slowMultiplier, data.slowDuration);
+
+            if (currentDamage > 0f)
+                target.TakeDamage(currentDamage);
         }
 
         public bool TryUpgrade()
