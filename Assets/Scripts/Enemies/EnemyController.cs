@@ -29,6 +29,9 @@ namespace CyberDefense.Enemies
         private SpriteRenderer spriteRenderer;
         private Rigidbody2D rb;
 
+        private float slowMultiplier = 1f;
+        private float slowTimer;
+
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
@@ -42,6 +45,8 @@ namespace CyberDefense.Enemies
             waypoints = path;
             currentWaypointIndex = 0;
             IsDead = false;
+            slowMultiplier = 1f;
+            slowTimer = 0f;
 
             if (spriteRenderer != null && data.icon != null)
                 spriteRenderer.sprite = data.icon;
@@ -53,7 +58,24 @@ namespace CyberDefense.Enemies
         private void FixedUpdate()
         {
             if (IsDead || waypoints == null || waypoints.Count == 0) return;
+
+            if (slowTimer > 0f)
+            {
+                slowTimer -= Time.fixedDeltaTime;
+                if (slowTimer <= 0f) slowMultiplier = 1f;
+            }
+
             MoveAlongPath();
+        }
+
+        /// <summary>
+        /// 허니팟 등 슬로우 타워가 호출합니다. 가장 강한 효과와 가장 긴 지속시간을 유지합니다.
+        /// </summary>
+        public void ApplySlow(float multiplier, float duration)
+        {
+            multiplier = Mathf.Clamp01(multiplier);
+            if (multiplier < slowMultiplier) slowMultiplier = multiplier;
+            if (duration > slowTimer) slowTimer = duration;
         }
 
         private void MoveAlongPath()
@@ -65,8 +87,9 @@ namespace CyberDefense.Enemies
             }
 
             Vector3 target = waypoints[currentWaypointIndex];
+            float speed = Data.moveSpeed * slowMultiplier;
             Vector2 newPos = Vector2.MoveTowards(
-                rb.position, target, Data.moveSpeed * Time.fixedDeltaTime);
+                rb.position, target, speed * Time.fixedDeltaTime);
             rb.MovePosition(newPos);
 
             if (Vector2.Distance(newPos, (Vector2)target) < 0.05f)
