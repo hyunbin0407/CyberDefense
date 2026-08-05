@@ -33,18 +33,32 @@ namespace CyberDefense.Waves
     /// </summary>
     public class WaveSpawner : MonoBehaviour
     {
+        public static WaveSpawner Instance { get; private set; }
+
         [SerializeField] private List<WaveDefinition> waves = new List<WaveDefinition>();
         [SerializeField] private List<Transform> pathWaypoints = new List<Transform>();
         [SerializeField] private Transform spawnPoint;
 
         public int CurrentWaveIndex { get; private set; } = -1;
+        public int TotalWaves => waves.Count;
         public bool IsSpawning { get; private set; }
 
         private int aliveEnemyCount;
         private List<Vector3> cachedPath;
 
         public event Action<int, int> OnWaveStarted; // (현재 웨이브 인덱스(0부터), 전체 웨이브 수)
+        public event Action<int, int, float> OnPrepareCountdown; // (다음 웨이브 인덱스, 전체 웨이브 수, 시작까지 남은 시간(초))
         public event Action OnAllWavesCleared;
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+        }
 
         private void Start()
         {
@@ -72,7 +86,7 @@ namespace CyberDefense.Waves
                 if (GameManager.Instance != null)
                     GameManager.Instance.SetState(GameManager.GameState.Prepare);
 
-                yield return new WaitForSeconds(wave.delayBeforeWave);
+                yield return StartCoroutine(CountdownToWave(i, wave.delayBeforeWave));
 
                 if (GameManager.Instance != null)
                     GameManager.Instance.SetState(GameManager.GameState.Playing);
@@ -87,6 +101,21 @@ namespace CyberDefense.Waves
             OnAllWavesCleared?.Invoke();
             if (GameManager.Instance != null)
                 GameManager.Instance.NotifyAllWavesCleared();
+        }
+
+        /// <summary>
+        /// 다음 웨이브 시작까지 남은 시간을 매 프레임 OnPrepareCountdown으로 알립니다.
+        /// </summary>
+        private IEnumerator CountdownToWave(int waveIndex, float delay)
+        {
+            float remaining = delay;
+            while (remaining > 0f)
+            {
+                OnPrepareCountdown?.Invoke(waveIndex, waves.Count, remaining);
+                yield return null;
+                remaining -= Time.deltaTime;
+            }
+            OnPrepareCountdown?.Invoke(waveIndex, waves.Count, 0f);
         }
 
         private IEnumerator SpawnWave(WaveDefinition wave)
