@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using CyberDefense.Core;
 using CyberDefense.Economy;
+using CyberDefense.Waves;
 
 namespace CyberDefense.UI
 {
@@ -16,6 +17,7 @@ namespace CyberDefense.UI
         [SerializeField] private TMP_Text currencyText;
         [SerializeField] private TMP_Text serverHealthText;
         [SerializeField] private TMP_Text waveText;
+        [SerializeField] private TMP_Text nextWaveCountdownText;
 
         private void Start()
         {
@@ -31,6 +33,12 @@ namespace CyberDefense.UI
                 UpdateServerHealthText(GameManager.Instance.ServerHealth);
                 GameManager.Instance.OnServerHealthChanged += UpdateServerHealthText;
             }
+
+            if (WaveSpawner.Instance != null)
+            {
+                WaveSpawner.Instance.OnWaveStarted += UpdateWaveText;
+                WaveSpawner.Instance.OnPrepareCountdown += UpdateNextWaveCountdownText;
+            }
         }
 
         private void OnDestroy()
@@ -41,6 +49,12 @@ namespace CyberDefense.UI
 
             if (GameManager.Instance != null)
                 GameManager.Instance.OnServerHealthChanged -= UpdateServerHealthText;
+
+            if (WaveSpawner.Instance != null)
+            {
+                WaveSpawner.Instance.OnWaveStarted -= UpdateWaveText;
+                WaveSpawner.Instance.OnPrepareCountdown -= UpdateNextWaveCountdownText;
+            }
         }
 
         private void UpdateCurrencyText(int amount)
@@ -62,6 +76,24 @@ namespace CyberDefense.UI
         {
             if (waveText != null)
                 waveText.text = $"웨이브: {currentWaveIndex + 1} / {totalWaves}";
+        }
+
+        /// <summary>
+        /// WaveSpawner의 OnPrepareCountdown 이벤트에 연결해서 사용하세요.
+        /// 다음 웨이브 시작까지 남은 시간을 표시하고, 웨이브가 시작되면(0초) 숨깁니다.
+        /// </summary>
+        public void UpdateNextWaveCountdownText(int nextWaveIndex, int totalWaves, float secondsRemaining)
+        {
+            if (nextWaveCountdownText == null) return;
+
+            if (secondsRemaining <= 0f)
+            {
+                nextWaveCountdownText.text = string.Empty;
+                return;
+            }
+
+            nextWaveCountdownText.text =
+                $"다음 웨이브({nextWaveIndex + 1}/{totalWaves})까지: {Mathf.CeilToInt(secondsRemaining)}초";
         }
     }
 }
