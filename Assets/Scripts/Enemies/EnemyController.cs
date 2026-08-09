@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CyberDefense.Core;
@@ -15,6 +16,11 @@ namespace CyberDefense.Enemies
     [RequireComponent(typeof(Rigidbody2D))]
     public class EnemyController : MonoBehaviour
     {
+        private static readonly Color HitFlashColor = Color.red;
+        private const float HitFlashDuration = 0.1f;
+        private const float HitPunchScaleRatio = 0.1f; // 원래 크기의 ±10% (0.9~1.1배)
+        private const float DeathEffectDuration = 0.15f;
+
         public EnemyData Data { get; private set; }
         public float CurrentHealth { get; private set; }
         public bool IsStealth => Data != null && Data.isStealth;
@@ -32,10 +38,16 @@ namespace CyberDefense.Enemies
         private float slowMultiplier = 1f;
         private float slowTimer;
 
+        private Color originalColor;
+        private Vector3 originalScale;
+        private Coroutine hitEffectRoutine;
+
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
             rb = GetComponent<Rigidbody2D>();
+            originalColor = spriteRenderer.color;
+            originalScale = transform.localScale;
         }
 
         public void Initialize(EnemyData data, List<Vector3> path)
@@ -112,6 +124,39 @@ namespace CyberDefense.Enemies
             {
                 Die();
             }
+            else
+            {
+                PlayHitReaction();
+            }
+        }
+
+        /// <summary>
+        /// 피격 시 색이 짧게 번쩍이고 크기가 살짝 커졌다 줄어드는 연출입니다.
+        /// </summary>
+        private void PlayHitReaction()
+        {
+            if (hitEffectRoutine != null) StopCoroutine(hitEffectRoutine);
+            hitEffectRoutine = StartCoroutine(HitReactionRoutine());
+        }
+
+        private IEnumerator HitReactionRoutine()
+        {
+            spriteRenderer.color = HitFlashColor;
+
+            Vector3 punchScale = originalScale * (1f + HitPunchScaleRatio);
+            float elapsed = 0f;
+
+            while (elapsed < HitFlashDuration)
+            {
+                float t = elapsed / HitFlashDuration;
+                transform.localScale = Vector3.Lerp(punchScale, originalScale, t);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            transform.localScale = originalScale;
+            spriteRenderer.color = originalColor;
+            hitEffectRoutine = null;
         }
 
         private void Die()
@@ -119,10 +164,38 @@ namespace CyberDefense.Enemies
             if (IsDead) return;
             IsDead = true;
 
+            if (hitEffectRoutine != null)
+            {
+                StopCoroutine(hitEffectRoutine);
+                hitEffectRoutine = null;
+            }
+
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.AddCurrency(Data.rewardOnKill);
 
             OnDeath?.Invoke(this);
+            StartCoroutine(DeathEffectRoutine());
+        }
+
+        /// <summary>
+        /// 스케일을 줄이고 페이드 아웃한 뒤에 오브젝트를 파괴합니다.
+        /// </summary>
+        private IEnumerator DeathEffectRoutine()
+        {
+            Vector3 startScale = transform.localScale;
+            Color startColor = spriteRenderer.color;
+            Color endColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+
+            float elapsed = 0f;
+            while (elapsed < DeathEffectDuration)
+            {
+                float t = elapsed / DeathEffectDuration;
+                transform.localScale = Vector3.Lerp(startScale, Vector3.zero, t);
+                spriteRenderer.color = Color.Lerp(startColor, endColor, t);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
             Destroy(gameObject);
         }
 
