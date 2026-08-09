@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CyberDefense.Data;
@@ -14,12 +15,16 @@ namespace CyberDefense.Towers
         [SerializeField] private Transform firePoint;
         [SerializeField] private LineRenderer attackLine;
 
+        private const float AttackLineFlashDuration = 0.12f;
+        private const int AreaEffectSegmentCount = 24;
+
         public int CurrentLevel { get; private set; } = 1;
         public Vector2Int GridCell { get; private set; }
 
         private float currentDamage;
         private float attackTimer;
         private EnemyController currentTarget;
+        private Coroutine attackLineRoutine;
 
         private readonly List<EnemyController> enemiesInRange = new List<EnemyController>();
         private CircleCollider2D rangeCollider;
@@ -64,13 +69,6 @@ namespace CyberDefense.Towers
             {
                 Attack(currentTarget);
                 attackTimer = data.attackCooldown;
-            }
-
-            if (attackLine != null) attackLine.enabled = currentTarget != null;
-            if (attackLine != null && currentTarget != null)
-            {
-                attackLine.SetPosition(0, firePoint != null ? firePoint.position : transform.position);
-                attackLine.SetPosition(1, currentTarget.transform.position);
             }
         }
 
@@ -119,9 +117,14 @@ namespace CyberDefense.Towers
         private void Attack(EnemyController target)
         {
             if (data.isAreaAttack)
+            {
                 AttackArea(target.transform.position);
+            }
             else
+            {
                 ApplyHit(target);
+                PlayLaserEffect(target.transform.position);
+            }
         }
 
         private void AttackArea(Vector3 center)
@@ -134,6 +137,68 @@ namespace CyberDefense.Towers
                 if (enemy.IsStealth && !data.canDetectStealth) continue;
                 ApplyHit(enemy);
             }
+
+            PlayAreaEffect(center);
+        }
+
+        /// <summary>
+        /// 단일 타겟 공격 시 발사 순간에만 레이저가 반짝이는 연출입니다.
+        /// </summary>
+        private void PlayLaserEffect(Vector3 targetPosition)
+        {
+            if (attackLine == null) return;
+
+            if (attackLineRoutine != null) StopCoroutine(attackLineRoutine);
+            attackLineRoutine = StartCoroutine(LaserFlashRoutine(targetPosition));
+        }
+
+        private IEnumerator LaserFlashRoutine(Vector3 targetPosition)
+        {
+            attackLine.loop = false;
+            attackLine.startColor = data.effectColor;
+            attackLine.endColor = data.effectColor;
+            attackLine.positionCount = 2;
+            attackLine.SetPosition(0, firePoint != null ? firePoint.position : transform.position);
+            attackLine.SetPosition(1, targetPosition);
+            attackLine.enabled = true;
+
+            yield return new WaitForSeconds(AttackLineFlashDuration);
+
+            attackLine.enabled = false;
+            attackLineRoutine = null;
+        }
+
+        /// <summary>
+        /// 광역 공격 시 공격 지점(사거리 areaRadius)에 원형으로 퍼지는 이펙트를
+        /// attackLine을 재사용해 그립니다. 새 컴포넌트를 추가하지 않기 위한 방식입니다.
+        /// </summary>
+        private void PlayAreaEffect(Vector3 center)
+        {
+            if (attackLine == null) return;
+
+            if (attackLineRoutine != null) StopCoroutine(attackLineRoutine);
+            attackLineRoutine = StartCoroutine(AreaEffectRoutine(center));
+        }
+
+        private IEnumerator AreaEffectRoutine(Vector3 center)
+        {
+            attackLine.loop = true;
+            attackLine.startColor = data.effectColor;
+            attackLine.endColor = data.effectColor;
+            attackLine.positionCount = AreaEffectSegmentCount;
+            for (int i = 0; i < AreaEffectSegmentCount; i++)
+            {
+                float angle = i * Mathf.PI * 2f / AreaEffectSegmentCount;
+                Vector3 point = center + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * data.areaRadius;
+                attackLine.SetPosition(i, point);
+            }
+            attackLine.enabled = true;
+
+            yield return new WaitForSeconds(AttackLineFlashDuration);
+
+            attackLine.enabled = false;
+            attackLine.loop = false;
+            attackLineRoutine = null;
         }
 
         /// <summary>
