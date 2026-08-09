@@ -49,5 +49,9 @@ namespace CyberDefense.Data
         [Range(0.1f, 1f)] public float slowMultiplier = 0.5f;
         [Tooltip("슬로우 효과 지속시간(초)")]
         public float slowDuration = 2f;
+
+        [Header("이펙트")]
+        [Tooltip("공격 시 레이저/범위 이펙트 색상 (타워 종류마다 다르게 지정)")]
+        public Color effectColor = Color.cyan;
     }
 }
