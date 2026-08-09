@@ -27,3 +27,4 @@ MonoBehaviour:
   upgradeCost: 30
   maxLevel: 3
   upgradeDamageMultiplier: 1.3
+  effectColor: {r: 0, g: 0, b: 1, a: 1}

@@ -30,3 +30,4 @@ MonoBehaviour:
   appliesSlow: 0
   slowMultiplier: 0.5
   slowDuration: 2
+  effectColor: {r: 1, g: 0.5490196, b: 0, a: 1}
