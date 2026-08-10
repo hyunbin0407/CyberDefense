@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using CyberDefense.Core;
 using CyberDefense.Data;
 using CyberDefense.Enemies;
 
@@ -116,6 +117,8 @@ namespace CyberDefense.Towers
 
         private void Attack(EnemyController target)
         {
+            AudioManager.Instance?.PlayTowerShootSFX();
+
             if (data.isAreaAttack)
             {
                 AttackArea(target.transform.position);
