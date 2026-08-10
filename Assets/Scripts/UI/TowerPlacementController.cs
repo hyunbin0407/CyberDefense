@@ -106,6 +106,8 @@ namespace CyberDefense.UI
 
             GridManager.Instance.OccupyCell(cell);
 
+            AudioManager.Instance?.PlayTowerBuildSFX();
+
             CancelPlacement();
         }
 
