@@ -173,6 +173,8 @@ namespace CyberDefense.Enemies
             if (CurrencyManager.Instance != null)
                 CurrencyManager.Instance.AddCurrency(Data.rewardOnKill);
 
+            AudioManager.Instance?.PlayEnemyDeathSFX();
+
             OnDeath?.Invoke(this);
             StartCoroutine(DeathEffectRoutine());
         }
