@@ -600,7 +600,7 @@ Transform:
   m_GameObject: {fileID: 480749650}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12, y: 0, z: 0}
+  m_LocalPosition: {x: -11.5, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -889,7 +889,7 @@ Transform:
   m_GameObject: {fileID: 586348354}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -26, y: 0, z: 0}
+  m_LocalPosition: {x: -25.5, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1830,7 +1830,7 @@ Transform:
   m_GameObject: {fileID: 1204664311}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 26, y: -5, z: 0}
+  m_LocalPosition: {x: 26.5, y: -4.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2050,7 +2050,15 @@ MonoBehaviour:
   height: 18
   cellSize: 1
   originPosition: {x: -27, y: -9, z: 0}
-  pathCells: []
+  spawnPoint: {fileID: 586348355}
+  pathWaypoints:
+  - {fileID: 480749651}
+  - {fileID: 2071320643}
+  - {fileID: 1204664312}
+  pathWidthInCells: 1
+  pathCellColor: {r: 0.1, g: 0.12, b: 0.25, a: 0.6}
+  buildableCellColor: {r: 0.3, g: 1, b: 0.3, a: 0.15}
+  visualizationSortingOrder: -10
 --- !u!4 &1565061245
 Transform:
   m_ObjectHideFlags: 0
@@ -2233,7 +2241,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.UI.TowerPlacementController
   mainCamera: {fileID: 519420031}
-  placementPreviewPrefab: {fileID: 0}
+  placementPreviewPrefab: {fileID: 2597633031332640478, guid: 23e70eadfbd7be58b810caf5f5b3c3d7, type: 3}
 --- !u!4 &1584739190
 Transform:
   m_ObjectHideFlags: 0
@@ -2730,7 +2738,7 @@ Transform:
   m_GameObject: {fileID: 2071320642}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12, y: -5, z: 0}
+  m_LocalPosition: {x: -11.5, y: -4.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
