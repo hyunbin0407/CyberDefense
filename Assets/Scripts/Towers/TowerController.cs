@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,6 +22,15 @@ namespace CyberDefense.Towers
 
         public int CurrentLevel { get; private set; } = 1;
         public Vector2Int GridCell { get; private set; }
+
+        /// <summary>이 타워의 원본 데이터입니다. UI에서 이름/최대 레벨 등을 표시할 때 사용합니다.</summary>
+        public TowerData Data => data;
+
+        /// <summary>업그레이드가 반영된 현재 공격력입니다. UI에서 표시할 때 사용합니다.</summary>
+        public float CurrentDamage => currentDamage;
+
+        /// <summary>업그레이드에 성공했을 때 발생합니다. UI가 표시를 갱신할 타이밍을 알 수 있게 합니다.</summary>
+        public event Action OnUpgraded;
 
         private float currentDamage;
         private float attackTimer;
@@ -221,6 +231,7 @@ namespace CyberDefense.Towers
             if (CurrentLevel >= data.maxLevel) return false;
             CurrentLevel++;
             currentDamage *= data.upgradeDamageMultiplier;
+            OnUpgraded?.Invoke();
             return true;
         }
 

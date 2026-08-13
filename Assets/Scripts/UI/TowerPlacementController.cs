@@ -20,6 +20,9 @@ namespace CyberDefense.UI
         private TowerData selectedTowerData;
         private GameObject previewInstance;
 
+        /// <summary>현재 타워 배치 모드(짓기 버튼을 눌러 배치를 준비 중)인지 여부입니다.</summary>
+        public bool IsPlacementModeActive => selectedTowerData != null;
+
         private void Awake()
         {
             if (mainCamera == null) mainCamera = Camera.main;
