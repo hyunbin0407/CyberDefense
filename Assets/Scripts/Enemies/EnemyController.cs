@@ -37,6 +37,7 @@ namespace CyberDefense.Enemies
 
         private float slowMultiplier = 1f;
         private float slowTimer;
+        private float difficultySpeedMultiplier = 1f;
 
         private Color originalColor;
         private Vector3 originalScale;
@@ -52,8 +53,18 @@ namespace CyberDefense.Enemies
 
         public void Initialize(EnemyData data, List<Vector3> path)
         {
+            Initialize(data, path, 1f, 1f);
+        }
+
+        /// <summary>
+        /// 난이도 배율을 반영해서 초기화합니다. WaveSpawner가 GameSessionSettings.SelectedDifficulty를
+        /// 참고해서 healthMultiplier/speedMultiplier를 전달합니다(난이도 미선택 시 1.0).
+        /// </summary>
+        public void Initialize(EnemyData data, List<Vector3> path, float healthMultiplier, float speedMultiplier)
+        {
             Data = data;
-            CurrentHealth = data.maxHealth;
+            CurrentHealth = data.maxHealth * Mathf.Max(0.01f, healthMultiplier);
+            difficultySpeedMultiplier = Mathf.Max(0.01f, speedMultiplier);
             waypoints = path;
             currentWaypointIndex = 0;
             IsDead = false;
@@ -99,7 +110,7 @@ namespace CyberDefense.Enemies
             }
 
             Vector3 target = waypoints[currentWaypointIndex];
-            float speed = Data.moveSpeed * slowMultiplier;
+            float speed = Data.moveSpeed * slowMultiplier * difficultySpeedMultiplier;
             Vector2 newPos = Vector2.MoveTowards(
                 rb.position, target, speed * Time.fixedDeltaTime);
             rb.MovePosition(newPos);

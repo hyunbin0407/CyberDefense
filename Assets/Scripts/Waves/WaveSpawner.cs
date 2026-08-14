@@ -143,7 +143,12 @@ namespace CyberDefense.Waves
             var controller = obj.GetComponent<EnemyController>();
             if (controller == null) controller = obj.AddComponent<EnemyController>();
 
-            controller.Initialize(data, cachedPath);
+            // 맵 선택 화면을 거쳐 들어온 경우에만 난이도 배율이 설정되어 있고, 아니면 1.0으로 취급합니다.
+            var difficulty = GameSessionSettings.SelectedDifficulty;
+            float healthMultiplier = difficulty != null ? difficulty.enemyHealthMultiplier : 1f;
+            float speedMultiplier = difficulty != null ? difficulty.enemySpeedMultiplier : 1f;
+
+            controller.Initialize(data, cachedPath, healthMultiplier, speedMultiplier);
             aliveEnemyCount++;
 
             controller.OnDeath += HandleEnemyRemoved;

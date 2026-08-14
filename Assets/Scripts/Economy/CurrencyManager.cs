@@ -48,5 +48,17 @@ namespace CyberDefense.Economy
             CurrentCurrency += amount;
             OnCurrencyChanged?.Invoke(CurrentCurrency);
         }
+
+        /// <summary>
+        /// 난이도 등 게임 시작 시점의 보정치를 시작 크레딧에 반영합니다.
+        /// AddCurrency와 달리 음수(차감)도 허용합니다.
+        /// </summary>
+        public void ApplyStartingBonus(int amount)
+        {
+            if (amount == 0) return;
+
+            CurrentCurrency = Mathf.Max(0, CurrentCurrency + amount);
+            OnCurrencyChanged?.Invoke(CurrentCurrency);
+        }
     }
 }

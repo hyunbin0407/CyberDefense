@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using CyberDefense.Economy;
 
 namespace CyberDefense.Core
 {
@@ -39,6 +40,26 @@ namespace CyberDefense.Core
             }
             Instance = this;
             ServerHealth = startingServerHealth;
+        }
+
+        private void Start()
+        {
+            ApplyDifficultySettings();
+        }
+
+        /// <summary>
+        /// 맵 선택 화면을 거쳐 들어온 경우(GameSessionSettings.SelectedDifficulty가 설정된 경우)
+        /// 선택한 난이도의 시작 크레딧 보너스를 반영합니다. 씬을 바로 실행한 경우(테스트 등)에는
+        /// SelectedDifficulty가 null이므로 아무 것도 하지 않고 기존과 동일하게 동작합니다.
+        /// CurrencyManager도 Awake에서 초기화되므로, 실행 순서가 보장되는 Start에서 처리합니다.
+        /// </summary>
+        private void ApplyDifficultySettings()
+        {
+            var difficulty = GameSessionSettings.SelectedDifficulty;
+            if (difficulty == null) return;
+
+            if (CurrencyManager.Instance != null)
+                CurrencyManager.Instance.ApplyStartingBonus(difficulty.startingCurrencyBonus);
         }
 
         /// <summary>
