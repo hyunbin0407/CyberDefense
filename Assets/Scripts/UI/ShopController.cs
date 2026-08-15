@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using CyberDefense.Core;
 using CyberDefense.Data;
@@ -16,21 +17,39 @@ namespace CyberDefense.UI
         [SerializeField] private List<ShopItemData> items = new List<ShopItemData>();
         [SerializeField] private GameObject itemSlotPrefab;
         [SerializeField] private Transform slotContainer;
+        [SerializeField] private TMP_Text coinsText;
 
         private readonly List<GameObject> spawnedSlots = new List<GameObject>();
 
         private void OnEnable()
         {
             RefreshShop();
+            UpdateCoinsText();
 
             if (InventoryManager.Instance != null)
                 InventoryManager.Instance.OnInventoryChanged += RefreshShop;
+            if (MetaCurrencyManager.Instance != null)
+                MetaCurrencyManager.Instance.OnCoinsChanged += HandleCoinsChanged;
         }
 
         private void OnDisable()
         {
             if (InventoryManager.Instance != null)
                 InventoryManager.Instance.OnInventoryChanged -= RefreshShop;
+            if (MetaCurrencyManager.Instance != null)
+                MetaCurrencyManager.Instance.OnCoinsChanged -= HandleCoinsChanged;
+        }
+
+        private void HandleCoinsChanged(int amount)
+        {
+            UpdateCoinsText();
+        }
+
+        private void UpdateCoinsText()
+        {
+            if (coinsText == null) return;
+            int amount = MetaCurrencyManager.Instance != null ? MetaCurrencyManager.Instance.CurrentCoins : 0;
+            coinsText.text = $"코인: {amount}";
         }
 
         /// <summary>
