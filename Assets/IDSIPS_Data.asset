@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: IDSIPS_Data
   m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.TowerData
   towerType: 1
-  displayName: "IDS/IPS"
-  description:
-  icon: {fileID: 0}
+  displayName: IDS/IPS
+  description: 
+  icon: {fileID: 21300000, guid: 50e6a8d772d024611b9ce9cefc2079a3, type: 3}
   towerPrefab: {fileID: 2349437036879387305, guid: 5f2e25aca167c3767ea33aea4087b500, type: 3}
   damage: 8
   attackRange: 3.5

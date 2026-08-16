@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.TowerData
   towerType: 2
   displayName: "\uC548\uD2F0\uBC14\uC774\uB7EC\uC2A4"
-  description:
-  icon: {fileID: 0}
+  description: 
+  icon: {fileID: 21300000, guid: c9b79cc5b67e040a182839bd4737dfbf, type: 3}
   towerPrefab: {fileID: 6177763909599089331, guid: 465bf2fdfcfd04704bd676561d3fd1ca, type: 3}
   damage: 5
   attackRange: 2.5
@@ -27,4 +27,7 @@ MonoBehaviour:
   upgradeCost: 30
   maxLevel: 3
   upgradeDamageMultiplier: 1.3
+  appliesSlow: 0
+  slowMultiplier: 0.5
+  slowDuration: 2
   effectColor: {r: 0, g: 1, b: 0, a: 1}
