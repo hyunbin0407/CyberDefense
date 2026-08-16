@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DDoSBot_Data
   m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.EnemyData
   enemyType: 3
-  displayName: "DDoS봇"
-  icon: {fileID: 0}
+  displayName: "DDoS\uBD07"
+  icon: {fileID: 21300000, guid: b224ef72df9914c48a1a15e4b410f5e0, type: 3}
   enemyPrefab: {fileID: 3235661803150097623, guid: 560a6101ae61975a8e2daa4498ebe53a, type: 3}
   maxHealth: 10
   moveSpeed: 4

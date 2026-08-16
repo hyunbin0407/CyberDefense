@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.EnemyData
   enemyType: 1
   displayName: "\uB79C\uC12C\uC6E8\uC5B4"
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ffa82c2864fb14f46bffdefd3a0362d3, type: 3}
   enemyPrefab: {fileID: 7432611521966424082, guid: 3adcb8a1ae49a4c83bb0dbd5fa7078b3, type: 3}
   maxHealth: 100
   moveSpeed: 0.8

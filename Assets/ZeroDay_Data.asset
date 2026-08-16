@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: ZeroDay_Data
   m_EditorClassIdentifier: Assembly-CSharp::CyberDefense.Data.EnemyData
   enemyType: 2
-  displayName: "제로데이"
-  icon: {fileID: 0}
+  displayName: "\uC81C\uB85C\uB370\uC774"
+  icon: {fileID: 21300000, guid: fd6ee075e376a401aab14793e6d338a9, type: 3}
   enemyPrefab: {fileID: 6074164698812134423, guid: d21e67a0b77dc03418191837a2e5dbda, type: 3}
   maxHealth: 40
   moveSpeed: 1.6
