@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using CyberDefense.Core;
 
@@ -15,6 +16,10 @@ namespace CyberDefense.UI
         [SerializeField] private GameObject panelRoot; // 평소엔 꺼져있다가 게임 끝나면 켜짐
         [SerializeField] private TMP_Text resultText;
         [SerializeField] private Button restartButton;
+        [SerializeField] private Button backButton;
+
+        [Header("뒤로가기 버튼이 이동할 씬 이름")]
+        [SerializeField] private string backSceneName = "MapSelect";
 
         [Header("게임 종료 시 비활성화할 타워 짓기 버튼들")]
         [SerializeField] private Button[] buildButtons;
@@ -30,6 +35,9 @@ namespace CyberDefense.UI
 
             if (restartButton != null)
                 restartButton.onClick.AddListener(HandleRestartClicked);
+
+            if (backButton != null)
+                backButton.onClick.AddListener(HandleBackClicked);
         }
 
         private void OnDestroy()
@@ -39,6 +47,9 @@ namespace CyberDefense.UI
 
             if (restartButton != null)
                 restartButton.onClick.RemoveListener(HandleRestartClicked);
+
+            if (backButton != null)
+                backButton.onClick.RemoveListener(HandleBackClicked);
         }
 
         private void HandleGameStateChanged(GameManager.GameState newState)
@@ -78,6 +89,16 @@ namespace CyberDefense.UI
         {
             if (GameManager.Instance != null)
                 GameManager.Instance.RestartLevel();
+        }
+
+        /// <summary>
+        /// 맵 선택 화면으로 돌아갑니다. Victory/Defeat 상태는 이미 Time.timeScale이 1이지만,
+        /// 혹시 모를 경우를 대비해 명시적으로 복원한 뒤 씬을 로드합니다.
+        /// </summary>
+        private void HandleBackClicked()
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(backSceneName);
         }
     }
 }
