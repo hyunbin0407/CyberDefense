@@ -3251,6 +3251,8 @@ MonoBehaviour:
   pathCellColor: {r: 0.1, g: 0.12, b: 0.25, a: 0.6}
   buildableCellColor: {r: 0.3, g: 1, b: 0.3, a: 0.15}
   visualizationSortingOrder: -10
+  buildableTileSprite: {fileID: -6433039963583408130, guid: 792a9469054d04075a2611bb8eceb66a, type: 3}
+  pathTileSprite: {fileID: -3934758828790684932, guid: 24f39f5854fe9486bae43ab315f4443a, type: 3}
 --- !u!4 &1565061245
 Transform:
   m_ObjectHideFlags: 0

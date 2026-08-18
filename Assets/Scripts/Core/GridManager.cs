@@ -27,12 +27,18 @@ namespace CyberDefense.Core
         [SerializeField] private int pathWidthInCells = 1;
 
         [Header("런타임 시각화 (Game 뷰/실제 빌드에서 보이는 그리드)")]
-        [Tooltip("경로 셀 색상 (알파값으로 반투명하게)")]
+        [Tooltip("경로 셀 색상 (알파값으로 반투명하게). pathTileSprite가 비어 있을 때만 사용됩니다.")]
         [SerializeField] private Color pathCellColor = new Color(0.1f, 0.12f, 0.25f, 0.6f);
-        [Tooltip("설치 가능한 빈 셀 색상 (알파값으로 은은하게)")]
+        [Tooltip("설치 가능한 빈 셀 색상 (알파값으로 은은하게). buildableTileSprite가 비어 있을 때만 사용됩니다.")]
         [SerializeField] private Color buildableCellColor = new Color(0.3f, 1f, 0.3f, 0.15f);
         [Tooltip("타워/적 스프라이트보다 뒤에 그려지도록 낮은 값을 사용합니다.")]
         [SerializeField] private int visualizationSortingOrder = -10;
+
+        [Header("타일 아트 (비워두면 위 색상으로 단색 표시)")]
+        [Tooltip("설치 가능한 빈 셀에 채울 타일 이미지")]
+        [SerializeField] private Sprite buildableTileSprite;
+        [Tooltip("적 이동 경로 셀에 채울 타일 이미지")]
+        [SerializeField] private Sprite pathTileSprite;
 
         // 경로 셀 조회가 빈번하므로(매 프레임 CanPlaceTower 호출) HashSet으로 O(1) 조회합니다.
         private readonly HashSet<Vector2Int> pathCells = new HashSet<Vector2Int>();
@@ -174,13 +180,36 @@ namespace CyberDefense.Core
         // ==================== 런타임 시각화 (메시 생성) ====================
 
         /// <summary>
-        /// 셀마다 개별 오브젝트를 만드는 대신, 그리드 전체를 하나의 메시로 만들어
-        /// MeshRenderer 하나로 그립니다(수백~수천 셀이어도 가볍게 처리하기 위함).
+        /// 셀마다 개별 오브젝트를 만드는 대신, 경로/설치가능 셀을 각각 하나의 메시로 묶어
+        /// MeshRenderer 두 개로 그립니다(수백~수천 셀이어도 가볍게 처리하기 위함).
+        /// 타일 스프라이트가 지정되어 있으면 해당 이미지를 셀마다 찍어서 그리고,
+        /// 비어 있으면 기존처럼 단색(버텍스 컬러)으로 대체합니다.
         /// Start/Awake에서 한 번만 생성하고 이후 다시 만들지 않습니다.
         /// </summary>
         private void BuildGridVisualization()
         {
-            var visualGO = new GameObject("GridVisualization");
+            var pathCellList = new List<Vector2Int>();
+            var buildableCellList = new List<Vector2Int>();
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    var cell = new Vector2Int(x, y);
+                    if (IsPathCell(cell)) pathCellList.Add(cell);
+                    else buildableCellList.Add(cell);
+                }
+            }
+
+            CreateTileLayer("PathTiles", pathCellList, pathTileSprite, pathCellColor);
+            CreateTileLayer("BuildableTiles", buildableCellList, buildableTileSprite, buildableCellColor);
+        }
+
+        private void CreateTileLayer(string name, List<Vector2Int> cells, Sprite tileSprite, Color fallbackColor)
+        {
+            if (cells.Count == 0) return;
+
+            var visualGO = new GameObject(name);
             visualGO.transform.SetParent(transform);
             // originPosition 기준의 절대 월드 좌표로 정점을 계산할 것이므로,
             // 부모(GridManager)의 위치와 무관하게 이 오브젝트의 월드 트랜스폼을 원점/기본값으로 고정합니다.
@@ -191,62 +220,79 @@ namespace CyberDefense.Core
             var meshFilter = visualGO.AddComponent<MeshFilter>();
             var meshRenderer = visualGO.AddComponent<MeshRenderer>();
 
-            // 정점 컬러가 화면에 보이려면 버텍스 컬러를 지원하는 셰이더가 필요합니다.
             // 별도 Material 에셋을 만들지 않고 코드에서 바로 생성합니다.
-            meshRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            var material = new Material(Shader.Find("Sprites/Default"));
+            if (tileSprite != null) material.mainTexture = tileSprite.texture;
+            meshRenderer.material = material;
             meshRenderer.sortingOrder = visualizationSortingOrder;
             meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
             meshRenderer.receiveShadows = false;
 
-            meshFilter.mesh = BuildGridMesh();
+            meshFilter.mesh = BuildTileMesh(cells, tileSprite, fallbackColor);
         }
 
-        private Mesh BuildGridMesh()
+        private Mesh BuildTileMesh(List<Vector2Int> cells, Sprite tileSprite, Color fallbackColor)
         {
-            int cellCount = width * height;
+            int cellCount = cells.Count;
             var vertices = new Vector3[cellCount * 4];
+            var uvs = new Vector2[cellCount * 4];
             var colors = new Color[cellCount * 4];
             var triangles = new int[cellCount * 6];
 
             float half = cellSize * 0.5f;
+
+            // 타일 이미지가 있으면 셀마다 이미지를 그대로 찍고(버텍스 컬러는 흰색으로 두어 원본 색 유지),
+            // 없으면 기존처럼 fallbackColor로 단색 사각형을 그립니다.
+            Vector2 uvMin = Vector2.zero;
+            Vector2 uvMax = Vector2.one;
+            if (tileSprite != null)
+            {
+                var tex = tileSprite.texture;
+                var rect = tileSprite.rect;
+                uvMin = new Vector2(rect.x / tex.width, rect.y / tex.height);
+                uvMax = new Vector2((rect.x + rect.width) / tex.width, (rect.y + rect.height) / tex.height);
+            }
+            Color color = tileSprite != null ? Color.white : fallbackColor;
+
             int vi = 0;
             int ti = 0;
 
-            for (int x = 0; x < width; x++)
+            for (int i = 0; i < cellCount; i++)
             {
-                for (int y = 0; y < height; y++)
-                {
-                    var cell = new Vector2Int(x, y);
-                    Vector3 center = CellToWorld(cell);
-                    Color color = IsPathCell(cell) ? pathCellColor : buildableCellColor;
+                Vector3 center = CellToWorld(cells[i]);
 
-                    // 셀 하나를 사각형(quad) = 삼각형 2개로 만듭니다.
-                    vertices[vi + 0] = center + new Vector3(-half, -half, 0f);
-                    vertices[vi + 1] = center + new Vector3(-half, half, 0f);
-                    vertices[vi + 2] = center + new Vector3(half, half, 0f);
-                    vertices[vi + 3] = center + new Vector3(half, -half, 0f);
+                // 셀 하나를 사각형(quad) = 삼각형 2개로 만듭니다.
+                vertices[vi + 0] = center + new Vector3(-half, -half, 0f);
+                vertices[vi + 1] = center + new Vector3(-half, half, 0f);
+                vertices[vi + 2] = center + new Vector3(half, half, 0f);
+                vertices[vi + 3] = center + new Vector3(half, -half, 0f);
 
-                    colors[vi + 0] = color;
-                    colors[vi + 1] = color;
-                    colors[vi + 2] = color;
-                    colors[vi + 3] = color;
+                uvs[vi + 0] = new Vector2(uvMin.x, uvMin.y);
+                uvs[vi + 1] = new Vector2(uvMin.x, uvMax.y);
+                uvs[vi + 2] = new Vector2(uvMax.x, uvMax.y);
+                uvs[vi + 3] = new Vector2(uvMax.x, uvMin.y);
 
-                    triangles[ti + 0] = vi + 0;
-                    triangles[ti + 1] = vi + 1;
-                    triangles[ti + 2] = vi + 2;
-                    triangles[ti + 3] = vi + 0;
-                    triangles[ti + 4] = vi + 2;
-                    triangles[ti + 5] = vi + 3;
+                colors[vi + 0] = color;
+                colors[vi + 1] = color;
+                colors[vi + 2] = color;
+                colors[vi + 3] = color;
 
-                    vi += 4;
-                    ti += 6;
-                }
+                triangles[ti + 0] = vi + 0;
+                triangles[ti + 1] = vi + 1;
+                triangles[ti + 2] = vi + 2;
+                triangles[ti + 3] = vi + 0;
+                triangles[ti + 4] = vi + 2;
+                triangles[ti + 5] = vi + 3;
+
+                vi += 4;
+                ti += 6;
             }
 
             var mesh = new Mesh();
             // 정점 수가 65535를 넘을 수 있는 큰 그리드도 안전하게 처리하기 위해 32비트 인덱스를 사용합니다.
             mesh.indexFormat = IndexFormat.UInt32;
             mesh.vertices = vertices;
+            mesh.uv = uvs;
             mesh.colors = colors;
             mesh.triangles = triangles;
             mesh.RecalculateBounds();
